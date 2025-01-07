@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
+        canvas { max-width: 800px; margin: auto; }
     </style>
 </head>
 <body>
@@ -27,14 +28,15 @@
                     let now = new Date().toLocaleTimeString();
                     volumeChart.data.labels.push(now);
                     volumeChart.data.datasets[0].data.push(data.volume);
-                    if (volumeChart.data.labels.length > 10) {
+                    if (volumeChart.data.labels.length > 20) {
                         volumeChart.data.labels.shift();
                         volumeChart.data.datasets[0].data.shift();
                     }
                     volumeChart.update();
-                });
+                })
+                .catch(error => console.error('Error fetching volume data:', error));
         }
-        setInterval(updateChart, 1000); // Update every 5 minutes
+        setInterval(updateChart, 1000); // Update every second
         updateChart();
     </script>
 </body>
