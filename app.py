@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; }
-        canvas { max-width: 800px; margin: auto; }
     </style>
 </head>
 <body>
