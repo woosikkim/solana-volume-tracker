@@ -1,43 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solana DEX Volume Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        canvas { max-width: 800px; margin: auto; }
-    </style>
-</head>
-<body>
-    <h1>Solana Total Trading Volume</h1>
-    <canvas id="volumeChart"></canvas>
-    <script>
-        let ctx = document.getElementById('volumeChart').getContext('2d');
-        let volumeChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: [], datasets: [{ label: '24H Volume (USD)', data: [], borderColor: 'blue', borderWidth: 2 }] },
-            options: { responsive: true, scales: { x: { display: true }, y: { display: true } } }
-        });
+from flask import Flask, render_template, jsonify
+import requests
 
-        function updateChart() {
-            fetch('/volume')
-                .then(response => response.json())
-                .then(data => {
-                    let now = new Date().toLocaleTimeString();
-                    volumeChart.data.labels.push(now);
-                    volumeChart.data.datasets[0].data.push(data.volume);
-                    if (volumeChart.data.labels.length > 20) {
-                        volumeChart.data.labels.shift();
-                        volumeChart.data.datasets[0].data.shift();
-                    }
-                    volumeChart.update();
-                })
-                .catch(error => console.error('Error fetching volume data:', error));
-        }
-        setInterval(updateChart, 1000); // Update every second
-        updateChart();
-    </script>
-</body>
-</html>
+app = Flask(__name__)
+
+# Route to render the HTML page
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Route to fetch Solana volume data
+@app.route('/volume')
+def get_volume():
+    try:
+        url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=solana"
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        volume = data[0].get("total_volume", 0)
+        return jsonify({"volume": volume})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+if __name__ == '__main__':
+    app.run(debug=True)
