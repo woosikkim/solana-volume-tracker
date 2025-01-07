@@ -1,24 +1,26 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
+import datetime
 
 app = Flask(__name__)
 
-# Route to render the HTML page
+def fetch_solana_volume(timeframe='1m'):
+    url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=solana"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        if data and isinstance(data, list):
+            return {"timeframe": timeframe, "volume": data[0].get("total_volume", 0)}
+    return {"timeframe": timeframe, "volume": 0}
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Route to fetch Solana volume data
 @app.route('/volume')
-def get_volume():
-    try:
-        url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=solana"
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        volume = data[0].get("total_volume", 0)
-        return jsonify({"volume": volume})
-    except Exception as e:
-        return jsonify({"error": str(e)})
+def volume():
+    timeframe = request.args.get("timeframe", "1m")
+    return jsonify(fetch_solana_volume(timeframe))
 
 if __name__ == '__main__':
     app.run(debug=True)
